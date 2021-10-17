@@ -1,0 +1,48 @@
+---
+title: "Tidy Tuesday 6/22/21"
+output:
+  html_document: default
+  word_document: default
+---
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+#Read in data and select only the Midwestern cities
+parkdata = read.csv("parks.csv")
+mid_cities = c("Chicago", "Cleveland", "Detroit","Indianapolis","Milwaukee","St. Louis")
+mid_parks = parkdata %>%
+  filter(city %in% mid_cities)
+
+
+#Select only Basketball hoops per 10,000 residents after 2015, rename column
+mid_cities_bball = mid_parks %>%
+  select(year,city,basketball_data) %>%
+  filter(year>2014)
+colnames(mid_cities_bball)[3] <- "Hoops_per_10000"
+
+#Plot hoops per 10,000 People in Midwestern cities by year
+mid_cities_bball %>%
+  mutate(label = if_else(year == max(year), as.character(city), NA_character_))
+plot = ggplot(data = mid_cities_bball) + 
+  geom_line(mapping = aes(x = year, y = Hoops_per_10000, color = city), size = 1.5) + 
+  labs(x = "", y = "Hoops per 10,000", 
+       caption = "#TidyTuesday 6/22/21 | Data from the Trust for Public Land",
+       title = "The Streetball Wars - Outdoor Basketball Hoops\nper 10,000 People in Major Midwestern Cities") +
+  theme(axis.text=element_text(size=13), axis.title=element_text(size=16,face="bold")) +
+  scale_color_manual(values=c('darkorchid4','darkorange3','gold4','firebrick4','dodgerblue4','darkseagreen4'))
+
+#Add City Labels...there's probably a better way to do this
+plot = plot +
+  annotate("text", x = 2019.68, y = 4.51, label="Chicago", size=4, color = "darkorchid4") +
+  annotate("text", x = 2019.685, y = 5.9, label="Cleveland", size=4, color = "darkorange3") +
+  annotate("text", x = 2019.8, y = 2.45, label="Detroit", size=4, color = "gold4") +
+  annotate("text", x = 2017.1, y = 2.07, label="Indianapolis", size=4, color = "firebrick4") +
+  annotate("text", x = 2019.65, y = 5.55, label="Milwaukee", size=4, color = "dodgerblue4") +
+  annotate("text", x = 2019.7, y = 3.0, label="St. Louis", size=4, color = "darkseagreen4") +
+  theme(legend.position = "none")
+
+plot
+```
+
